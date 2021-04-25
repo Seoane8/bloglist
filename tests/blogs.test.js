@@ -87,7 +87,7 @@ describe('POST blog', () => {
 })
 
 describe('DELETE blog', () => {
-  test('when \'id\' is valid, delete note', async () => {
+  test('when \'id\' is valid, delete blog', async () => {
     await helper.addBlogs()
 
     const blogToDelete = await helper.findBlog()
