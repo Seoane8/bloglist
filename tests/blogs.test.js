@@ -69,6 +69,21 @@ describe('POST blog', () => {
     const savedBlog = await helper.findBlog({ title: newBlog.title })
     expect(savedBlog.likes).toBe(0)
   })
+
+  test('when try POST blog without title or url, return bad request', async () => {
+    const { title, ...blogWithoutTitle } = newBlog
+    const { url, ...blogWithoutUrl } = newBlog
+
+    await api
+      .post('/api/blogs')
+      .send(blogWithoutTitle)
+      .expect(400)
+
+    await api
+      .post('/api/blogs')
+      .send(blogWithoutUrl)
+      .expect(400)
+  })
 })
 
 afterAll(helper.closeConnection)
