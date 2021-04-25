@@ -90,15 +90,14 @@ describe('DELETE blog', () => {
   test('when \'id\' is valid, delete note', async () => {
     await helper.addBlogs()
 
-    const { body: initialSavedBlogs } = await api.get('/api/blogs')
-    const blogToDelete = initialSavedBlogs[0]
+    const blogToDelete = await helper.findBlog()
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
       .expect(204)
 
-    const blogDeletedFound = helper.findBlog({ title: blogToDelete.title })
-    expect(blogDeletedFound).toBeUndefined()
+    const blogDeletedFound = await helper.findBlog({ title: blogToDelete.title })
+    expect(blogDeletedFound).toBeNull()
   })
 
   test('when \'id\' is invalid, bad request', async () => {
@@ -108,7 +107,7 @@ describe('DELETE blog', () => {
       .delete('/api/blogs/1234')
       .expect(400)
 
-    const numOfBlogs = await helper.countBlogs
+    const numOfBlogs = await helper.countBlogs()
     expect(numOfBlogs).toBe(initialBlogs.length)
   })
 
@@ -120,7 +119,7 @@ describe('DELETE blog', () => {
       .delete(`/api/blogs/${inexistentId}`)
       .expect(404)
 
-    const numOfBlogs = await helper.countBlogs
+    const numOfBlogs = await helper.countBlogs()
     expect(numOfBlogs).toBe(initialBlogs.length)
   })
 })
