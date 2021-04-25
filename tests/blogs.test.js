@@ -28,6 +28,15 @@ describe('GET all blogs', () => {
 
     expect(response.body).toHaveLength(initialBlogs.length)
   })
+
+  test('returned identifier is \'id\' instead of \'_id\'', async () => {
+    await helper.addBlogs()
+
+    const response = await api.get('/api/blogs')
+
+    expect(response.body[0].id).toBeDefined()
+    expect(response.body[0]._id).toBeUndefined()
+  })
 })
 
 afterAll(helper.closeConnection)
