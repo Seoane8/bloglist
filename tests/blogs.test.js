@@ -124,4 +124,56 @@ describe('DELETE blog', () => {
   })
 })
 
+describe('PUT blog', () => {
+  test('when modify blog with corrects params, blog is updated', async () => {
+    await helper.addBlogs()
+
+    const { id } = await helper.findBlog()
+    const expectedBlog = { ...newBlog, id }
+
+    const { body } = await api
+      .put(`/api/blogs/${id}`)
+      .send(newBlog)
+      .expect(200)
+
+    expect(body).toMatchObject(expectedBlog)
+
+    const updatedBlog = await helper.findBlog({ _id: id })
+    expect(updatedBlog).toMatchObject(expectedBlog)
+  })
+
+  test('when modify blog with negative likes, bad request', async () => {
+    await helper.addBlogs()
+
+    const { id, title } = await helper.findBlog()
+
+    await api
+      .put(`/api/blogs/${id}`)
+      .send({ ...newBlog, likes: -12 })
+      .expect(400)
+
+    const updatedBlog = await helper.findBlog({ _id: id })
+    expect(updatedBlog.title).toBe(title)
+  })
+
+  test('when \'id\' is invalid, bad request', async () => {
+    await helper.addBlogs()
+
+    await api
+      .put('/api/blogs/1234')
+      .send({ likes: 12 })
+      .expect(400)
+  })
+
+  test('when \'id\' not exist, not found', async () => {
+    const inexistentId = '60451827152dc22ad768f442'
+    await helper.addBlogs()
+
+    await api
+      .put(`/api/blogs/${inexistentId}`)
+      .send({ likes: 12 })
+      .expect(404)
+  })
+})
+
 afterAll(helper.closeConnection)
