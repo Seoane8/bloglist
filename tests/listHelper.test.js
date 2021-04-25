@@ -67,3 +67,22 @@ describe('Total likes', () => {
     expect(result).toBe(36)
   })
 })
+
+describe('Favorite blog', () => {
+  test('when list has empty, favorite is null', () => {
+    const result = listHelper.favoriteBlog([])
+    expect(result).toBeNull()
+  })
+
+  test('when list has only one blog, that is the favorite', () => {
+    const result = listHelper.favoriteBlog([blogs[1]])
+    const { _id, __v, url, ...expectedBlog } = blogs[1]
+    expect(result).toEqual(expectedBlog)
+  })
+
+  test('when list has more than one blog, total likes are the sum of the likes of them', () => {
+    const result = listHelper.favoriteBlog(blogs)
+    const { _id, __v, url, ...expectedBlog } = blogs[2]
+    expect(result).toEqual(expectedBlog)
+  })
+})
