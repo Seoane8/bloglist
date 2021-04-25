@@ -86,4 +86,43 @@ describe('POST blog', () => {
   })
 })
 
+describe('DELETE blog', () => {
+  test('when \'id\' is valid, delete note', async () => {
+    await helper.addBlogs()
+
+    const { body: initialSavedBlogs } = await api.get('/api/blogs')
+    const blogToDelete = initialSavedBlogs[0]
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
+
+    const blogDeletedFound = helper.findBlog({ title: blogToDelete.title })
+    expect(blogDeletedFound).toBeUndefined()
+  })
+
+  test('when \'id\' is invalid, bad request', async () => {
+    await helper.addBlogs()
+
+    await api
+      .delete('/api/blogs/1234')
+      .expect(400)
+
+    const numOfBlogs = await helper.countBlogs
+    expect(numOfBlogs).toBe(initialBlogs.length)
+  })
+
+  test('when \'id\' not exist, not found', async () => {
+    const inexistentId = '60451827152dc22ad768f442'
+    await helper.addBlogs()
+
+    await api
+      .delete(`/api/blogs/${inexistentId}`)
+      .expect(404)
+
+    const numOfBlogs = await helper.countBlogs
+    expect(numOfBlogs).toBe(initialBlogs.length)
+  })
+})
+
 afterAll(helper.closeConnection)
