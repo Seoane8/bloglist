@@ -3,7 +3,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 
 const controllers = require('./controllers')
-const {config, logger, middleware} = require('./utils')
+const { config, logger, middleware } = require('./utils')
 
 mongoose.connect(config.MONGODB_URI, {
   useNewUrlParser: true,
@@ -13,7 +13,6 @@ mongoose.connect(config.MONGODB_URI, {
 })
   .then(() => logger.info('Database connected'))
   .catch(err => logger.error(`Error connecting to database: ${err.message}`))
-
 
 const app = express()
   .use(cors())
