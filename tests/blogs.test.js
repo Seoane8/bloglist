@@ -3,6 +3,7 @@ const { Blog } = require('../models')
 const {
   api,
   initialBlogs,
+  newBlog,
   ...helper
 } = require('./testHelper')
 
@@ -43,13 +44,6 @@ describe('POST blog', () => {
   test('a well formed blog is created correctly', async () => {
     await helper.addBlogs()
 
-    const newBlog = {
-      title: 'SuperBlog by John Doe',
-      author: 'John Doe',
-      url: 'http://www.superblog.com',
-      likes: 1
-    }
-
     const response = await api
       .post('/api/blogs')
       .send(newBlog)
@@ -63,6 +57,17 @@ describe('POST blog', () => {
 
     const savedBlog = await helper.findBlog({ title: newBlog.title })
     expect(savedBlog).toMatchObject(newBlog)
+  })
+
+  test('a blog without likes parameter is created with 0 likes', async () => {
+    const { likes, ...blogToAdd } = newBlog
+    await api
+      .post('/api/blogs')
+      .send(blogToAdd)
+      .expect(201)
+
+    const savedBlog = await helper.findBlog({ title: newBlog.title })
+    expect(savedBlog.likes).toBe(0)
   })
 })
 

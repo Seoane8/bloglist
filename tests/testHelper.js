@@ -25,6 +25,13 @@ const initialBlogs = [
   }
 ]
 
+const newBlog = {
+  title: 'SuperBlog by John Doe',
+  author: 'John Doe',
+  url: 'http://www.superblog.com',
+  likes: 1
+}
+
 const addBlogs = async (bloglist = initialBlogs) => {
   const blogObjets = bloglist.map(blog => new Blog(blog))
   const promises = blogObjets.map(blogObjet => blogObjet.save())
@@ -40,6 +47,7 @@ const closeConnection = () => { mongoose.connection.close() }
 module.exports = {
   api,
   initialBlogs,
+  newBlog,
   addBlogs,
   findBlog,
   countBlogs,
