@@ -31,11 +31,17 @@ const addBlogs = async (bloglist = initialBlogs) => {
   await Promise.all(promises)
 }
 
+const findBlog = async params => await Blog.findOne(params)
+
+const countBlogs = async () => await Blog.countDocuments()
+
 const closeConnection = () => { mongoose.connection.close() }
 
 module.exports = {
   api,
   initialBlogs,
   addBlogs,
+  findBlog,
+  countBlogs,
   closeConnection
 }

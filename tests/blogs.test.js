@@ -39,4 +39,31 @@ describe('GET all blogs', () => {
   })
 })
 
+describe('POST blog', () => {
+  test('a well formed blog is created correctly', async () => {
+    await helper.addBlogs()
+
+    const newBlog = {
+      title: 'SuperBlog by John Doe',
+      author: 'John Doe',
+      url: 'http://www.superblog.com',
+      likes: 1
+    }
+
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    expect(response.body).toMatchObject(newBlog)
+
+    const numOfBlogs = await helper.countBlogs()
+    expect(numOfBlogs).toBe(initialBlogs.length + 1)
+
+    const savedBlog = await helper.findBlog({ title: newBlog.title })
+    expect(savedBlog).toMatchObject(newBlog)
+  })
+})
+
 afterAll(helper.closeConnection)
