@@ -46,12 +46,18 @@ blogsRouter.delete('/:id', payloadExtractor, async (request, response) => {
 
 blogsRouter.put('/:id', async (request, response) => {
   const { id } = request.params
-  const blog = request.body
+  const { likes } = request.body
+
+  if (!likes) {
+    return response
+      .status(400)
+      .json({ error: 'Path `likes` is required.' })
+  }
 
   const updatedBlog = await Blog
     .findByIdAndUpdate(
       id,
-      blog,
+      { likes },
       { new: true, runValidators: true })
 
   if (!updatedBlog) return response.status(404).end()
