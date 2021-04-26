@@ -159,21 +159,37 @@ describe('DELETE blog', () => {
 })
 
 describe('PUT blog', () => {
-  test('when modify blog with corrects params, blog is updated', async () => {
+  test('when modify likes, blog is updated', async () => {
     await helper.addBlogs()
 
-    const { id } = await Blog.findOne()
-    const expectedBlog = { ...newBlog, id }
+    const { id, likes, ...blog } = (await Blog.findOne()).toJSON()
+    const newLikes = likes + 1
+    const expectedBlog = { ...blog, id, likes: newLikes }
 
     const { body } = await api
       .put(`/api/blogs/${id}`)
-      .send(newBlog)
+      .send({ likes: newLikes })
       .expect(200)
 
     expect(body).toMatchObject(expectedBlog)
 
     const updatedBlog = await Blog.findOne({ _id: id })
     expect(updatedBlog).toMatchObject(expectedBlog)
+  })
+
+  test('when try to modify blog without likes, bad request', async () => {
+    await helper.addBlogs()
+
+    const { id, title } = (await Blog.findOne()).toJSON()
+    const { likes, ...blog } = newBlog
+
+    await api
+      .put(`/api/blogs/${id}`)
+      .send(blog)
+      .expect(400)
+
+    const updatedBlog = await Blog.findOne({ _id: id })
+    expect(updatedBlog.title).toBe(title)
   })
 
   test('when modify blog with negative likes, bad request', async () => {
