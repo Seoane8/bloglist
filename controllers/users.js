@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
 const { User } = require('../models')
+const { createToken } = require('../utils')
 
 usersRouter.get('/', async (request, response) => {
   const users = await User
@@ -31,7 +32,9 @@ usersRouter.post('/', async (request, response) => {
   const newUser = new User({ passwordHash, ...user })
 
   const savedUser = await newUser.save()
-  response.status(201).json(savedUser)
+
+  const token = createToken(savedUser)
+  response.status(201).json({ user: savedUser, token })
 })
 
 module.exports = usersRouter
