@@ -1,5 +1,6 @@
 const blogsRouter = require('express').Router()
 const { Blog, User } = require('../models')
+const { middleware: { payloadExtractor } } = require('../utils')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog
@@ -9,10 +10,13 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs)
 })
 
-blogsRouter.post('/', async (request, response) => {
-  const user = await User.findOne()
-  const newBlog = new Blog({ user: user._id, ...request.body })
+blogsRouter.post('/', payloadExtractor, async (request, response) => {
+  const { id } = request.payload
+  const user = await User.findById(id)
 
+  if (!user) return response.status(401).json({ error: 'invalid token' })
+
+  const newBlog = new Blog({ user: user._id, ...request.body })
   const savedBlog = await newBlog.save()
 
   user.blogs = user.blogs.concat(savedBlog._id)

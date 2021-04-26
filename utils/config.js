@@ -9,8 +9,11 @@ const MONGODB_URI =
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY
 
+const JWT_EXPIRATION = process.env.JWT_EXPIRATION
+
 module.exports = {
   PORT,
   MONGODB_URI,
-  JWT_SECRET_KEY
+  JWT_SECRET_KEY,
+  JWT_EXPIRATION
 }

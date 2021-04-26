@@ -19,6 +19,7 @@ const app = express()
   .use(cors())
   .use(express.json())
   .use(middleware.requestLogger)
+  .use(middleware.tokenExtractor)
 
   .use('/api/blogs', controllers.blogs)
   .use('/api/users', controllers.users)
