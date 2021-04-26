@@ -25,12 +25,19 @@ blogsRouter.post('/', payloadExtractor, async (request, response) => {
   response.status(201).json(savedBlog)
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
+blogsRouter.delete('/:id', payloadExtractor, async (request, response) => {
   const { id } = request.params
+  const { id: userId } = request.payload
 
-  const deletedBlog = await Blog.findByIdAndDelete(id)
+  const blog = await Blog.findById(id)
 
-  if (!deletedBlog) return response.status(404).end()
+  if (!blog) return response.status(404).end()
+  if (blog.user.toString() !== userId.toString()) {
+    return response.status(401).end()
+  }
+
+  await blog.delete()
+
   response.status(204).end()
 })
 
