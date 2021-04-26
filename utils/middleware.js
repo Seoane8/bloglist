@@ -21,7 +21,10 @@ const errorHandler = (error, request, response, next) => {
   }
 
   if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
+    return error.message.includes('to be unique')
+      ? response.status(409).json({ error: error.message.split(',')[1].trim() })
+      : response.status(400).json(
+        { error: error.message.split(',')[0].split(':')[2] })
   }
 
   next(error)
