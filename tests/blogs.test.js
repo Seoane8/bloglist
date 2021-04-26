@@ -52,10 +52,10 @@ describe('POST blog', () => {
 
     expect(response.body).toMatchObject(newBlog)
 
-    const numOfBlogs = await helper.countBlogs()
+    const numOfBlogs = await Blog.countDocuments()
     expect(numOfBlogs).toBe(initialBlogs.length + 1)
 
-    const savedBlog = await helper.findBlog({ title: newBlog.title })
+    const savedBlog = await Blog.findOne({ title: newBlog.title })
     expect(savedBlog).toMatchObject(newBlog)
   })
 
@@ -66,7 +66,7 @@ describe('POST blog', () => {
       .send(blogToAdd)
       .expect(201)
 
-    const savedBlog = await helper.findBlog({ title: newBlog.title })
+    const savedBlog = await Blog.findOne({ title: newBlog.title })
     expect(savedBlog.likes).toBe(0)
   })
 
@@ -90,13 +90,13 @@ describe('DELETE blog', () => {
   test('when \'id\' is valid, delete blog', async () => {
     await helper.addBlogs()
 
-    const blogToDelete = await helper.findBlog()
+    const blogToDelete = await Blog.findOne()
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
       .expect(204)
 
-    const blogDeletedFound = await helper.findBlog({ title: blogToDelete.title })
+    const blogDeletedFound = await Blog.findOne({ title: blogToDelete.title })
     expect(blogDeletedFound).toBeNull()
   })
 
@@ -107,7 +107,7 @@ describe('DELETE blog', () => {
       .delete('/api/blogs/1234')
       .expect(400)
 
-    const numOfBlogs = await helper.countBlogs()
+    const numOfBlogs = await Blog.countDocuments()
     expect(numOfBlogs).toBe(initialBlogs.length)
   })
 
@@ -119,7 +119,7 @@ describe('DELETE blog', () => {
       .delete(`/api/blogs/${inexistentId}`)
       .expect(404)
 
-    const numOfBlogs = await helper.countBlogs()
+    const numOfBlogs = await Blog.countDocuments()
     expect(numOfBlogs).toBe(initialBlogs.length)
   })
 })
@@ -128,7 +128,7 @@ describe('PUT blog', () => {
   test('when modify blog with corrects params, blog is updated', async () => {
     await helper.addBlogs()
 
-    const { id } = await helper.findBlog()
+    const { id } = await Blog.findOne()
     const expectedBlog = { ...newBlog, id }
 
     const { body } = await api
@@ -138,21 +138,21 @@ describe('PUT blog', () => {
 
     expect(body).toMatchObject(expectedBlog)
 
-    const updatedBlog = await helper.findBlog({ _id: id })
+    const updatedBlog = await Blog.findOne({ _id: id })
     expect(updatedBlog).toMatchObject(expectedBlog)
   })
 
   test('when modify blog with negative likes, bad request', async () => {
     await helper.addBlogs()
 
-    const { id, title } = await helper.findBlog()
+    const { id, title } = await Blog.findOne()
 
     await api
       .put(`/api/blogs/${id}`)
       .send({ ...newBlog, likes: -12 })
       .expect(400)
 
-    const updatedBlog = await helper.findBlog({ _id: id })
+    const updatedBlog = await Blog.findOne({ _id: id })
     expect(updatedBlog.title).toBe(title)
   })
 
