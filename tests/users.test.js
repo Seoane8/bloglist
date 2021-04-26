@@ -13,7 +13,7 @@ beforeEach(async () => {
 })
 
 describe('POST user', () => {
-  test('a well formed blog is created correctly', async () => {
+  test('a well formed user is created correctly', async () => {
     const { password, ...expectedUser } = newUser
 
     const response = await api
@@ -22,7 +22,7 @@ describe('POST user', () => {
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
-    expect(response.body).toMatchObject(expectedUser)
+    expect(response.body.user).toMatchObject(expectedUser)
 
     const numOfBlogs = await User.countDocuments()
     expect(numOfBlogs).toBe(initialUsers.length + 1)

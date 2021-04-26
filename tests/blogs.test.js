@@ -1,4 +1,4 @@
-const { Blog } = require('../models')
+const { Blog, User } = require('../models')
 
 const {
   api,
@@ -7,7 +7,10 @@ const {
   ...helper
 } = require('./testHelper')
 
-beforeEach(async () => await Blog.deleteMany({}))
+beforeEach(async () => {
+  await Blog.deleteMany({})
+  await User.deleteMany({})
+})
 
 describe('GET all blogs', () => {
   test('when there are NO blogs, return empty JSON array', async () => {
@@ -43,9 +46,11 @@ describe('GET all blogs', () => {
 describe('POST blog', () => {
   test('a well formed blog is created correctly', async () => {
     await helper.addBlogs()
+    const { token } = await helper.createUser()
 
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -59,10 +64,27 @@ describe('POST blog', () => {
     expect(savedBlog).toMatchObject(newBlog)
   })
 
+  test('a well formed blog without token return unauthorized', async () => {
+    await helper.addBlogs()
+
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+
+    expect(response.body.error).toContain('token missing')
+
+    const numOfBlogs = await Blog.countDocuments()
+    expect(numOfBlogs).toBe(initialBlogs.length)
+  })
+
   test('a blog without likes parameter is created with 0 likes', async () => {
+    const { token } = await helper.createUser()
     const { likes, ...blogToAdd } = newBlog
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(blogToAdd)
       .expect(201)
 
@@ -71,16 +93,19 @@ describe('POST blog', () => {
   })
 
   test('when try POST blog without title or url, return bad request', async () => {
+    const { token } = await helper.createUser()
     const { title, ...blogWithoutTitle } = newBlog
     const { url, ...blogWithoutUrl } = newBlog
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(blogWithoutTitle)
       .expect(400)
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(blogWithoutUrl)
       .expect(400)
   })
@@ -89,12 +114,17 @@ describe('POST blog', () => {
 describe('DELETE blog', () => {
   test('when \'id\' is valid, delete blog', async () => {
     await helper.addBlogs()
-
-    const blogToDelete = await Blog.findOne()
+    const { user, token } = await helper.createUser()
+    const blogToDelete = await helper.createBlog(newBlog, user._id)
+    const prevNumBlogs = await Blog.countDocuments()
 
     await api
-      .delete(`/api/blogs/${blogToDelete.id}`)
+      .delete(`/api/blogs/${blogToDelete._id}`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(204)
+
+    const numBlogs = await Blog.countDocuments()
+    expect(numBlogs).toBe(prevNumBlogs - 1)
 
     const blogDeletedFound = await Blog.findOne({ title: blogToDelete.title })
     expect(blogDeletedFound).toBeNull()
@@ -102,9 +132,11 @@ describe('DELETE blog', () => {
 
   test('when \'id\' is invalid, bad request', async () => {
     await helper.addBlogs()
+    const { token } = await helper.createUser()
 
     await api
       .delete('/api/blogs/1234')
+      .set('Authorization', `Bearer ${token}`)
       .expect(400)
 
     const numOfBlogs = await Blog.countDocuments()
@@ -114,9 +146,11 @@ describe('DELETE blog', () => {
   test('when \'id\' not exist, not found', async () => {
     const inexistentId = '60451827152dc22ad768f442'
     await helper.addBlogs()
+    const { token } = await helper.createUser()
 
     await api
       .delete(`/api/blogs/${inexistentId}`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(404)
 
     const numOfBlogs = await Blog.countDocuments()

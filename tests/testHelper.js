@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const bcrypt = require('bcrypt')
+const { createToken } = require('../utils')
 
 const { Blog, User } = require('../models')
 const app = require('../app.js')
@@ -33,7 +34,7 @@ const newBlog = {
   likes: 1
 }
 
-const addBlogs = async (bloglist = initialBlogs) => {
+const addBlogs = async (bloglist = initialBlogs, user = null) => {
   const blogObjets = bloglist.map(blog => new Blog(blog))
   const promises = blogObjets.map(blogObjet => blogObjet.save())
   await Promise.all(promises)
@@ -43,12 +44,14 @@ const initialUsers = [
   {
     username: 'jgomez',
     name: 'Juan',
-    password: 'jumez123'
+    password: 'jumez123',
+    blogs: []
   },
   {
     username: 'sfdez',
     name: 'Sara',
-    password: 'sfer567'
+    password: 'sfer567',
+    blogs: []
   }
 ]
 
@@ -66,6 +69,19 @@ const addUsers = async (users = initialUsers) => {
   }
 }
 
+const createUser = async ({ password, ...user } = newUser) => {
+  const passwordHash = await bcrypt.hash(password, 10)
+  const newUser = new User({ passwordHash, ...user })
+  const savedUser = await newUser.save()
+  const token = createToken(savedUser)
+  return { user: savedUser, token }
+}
+
+const createBlog = async (blog, userId) => {
+  const newBlog = new Blog({ user: userId, ...blog })
+  return await newBlog.save()
+}
+
 const closeConnection = () => { mongoose.connection.close() }
 
 module.exports = {
@@ -74,6 +90,8 @@ module.exports = {
   newBlog,
   initialUsers,
   newUser,
+  createUser,
+  createBlog,
   addBlogs,
   addUsers,
   closeConnection
