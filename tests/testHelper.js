@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const bcrypt = require('bcrypt')
 
-const { Blog } = require('../models')
+const { Blog, User } = require('../models')
 const app = require('../app.js')
 
 const api = supertest(app)
@@ -38,9 +39,32 @@ const addBlogs = async (bloglist = initialBlogs) => {
   await Promise.all(promises)
 }
 
-const findBlog = async params => await Blog.findOne(params)
+const initialUsers = [
+  {
+    username: 'jgomez',
+    name: 'Juan',
+    password: 'jumez123'
+  },
+  {
+    username: 'sfdez',
+    name: 'Sara',
+    password: 'sfer567'
+  }
+]
 
-const countBlogs = async () => await Blog.countDocuments()
+const newUser = {
+  username: 'dSeoaen',
+  name: 'Diego',
+  password: 'pswd'
+}
+
+const addUsers = async (users = initialUsers) => {
+  for (const { password, ...user } of users) {
+    const passwordHash = await bcrypt.hash(password, 10)
+    const newUser = new User({ passwordHash, ...user })
+    await newUser.save()
+  }
+}
 
 const closeConnection = () => { mongoose.connection.close() }
 
@@ -48,8 +72,9 @@ module.exports = {
   api,
   initialBlogs,
   newBlog,
+  initialUsers,
+  newUser,
   addBlogs,
-  findBlog,
-  countBlogs,
+  addUsers,
   closeConnection
 }
