@@ -22,6 +22,7 @@ const app = express()
 
   .use('/api/blogs', controllers.blogs)
   .use('/api/users', controllers.users)
+  .use('/api/login', controllers.login)
 
   .use(middleware.unknownEndpoint)
   .use(middleware.errorHandler)
