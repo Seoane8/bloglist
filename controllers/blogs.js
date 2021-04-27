@@ -22,7 +22,10 @@ blogsRouter.post('/', payloadExtractor, async (request, response) => {
   user.blogs = user.blogs.concat(savedBlog._id)
   user.save()
 
-  response.status(201).json(savedBlog)
+  const blogToReturn = await savedBlog
+    .populate('user', { blogs: 0 }).execPopulate()
+
+  response.status(201).json(blogToReturn)
 })
 
 blogsRouter.delete('/:id', payloadExtractor, async (request, response) => {
@@ -59,6 +62,7 @@ blogsRouter.put('/:id', async (request, response) => {
       id,
       { likes },
       { new: true, runValidators: true })
+    .populate('user', { blogs: 0 })
 
   if (!updatedBlog) return response.status(404).end()
   response.json(updatedBlog)
