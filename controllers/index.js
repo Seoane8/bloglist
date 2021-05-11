@@ -1,5 +1,6 @@
 module.exports = {
   blogs: require('./blogs'),
   users: require('./users'),
-  login: require('./login')
+  login: require('./login'),
+  testing: require('./testing')
 }

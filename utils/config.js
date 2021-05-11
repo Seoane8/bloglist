@@ -11,9 +11,12 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY
 
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION
 
+const IS_TEST_ENV = process.env.NODE_ENV === 'test'
+
 module.exports = {
   PORT,
   MONGODB_URI,
   JWT_SECRET_KEY,
-  JWT_EXPIRATION
+  JWT_EXPIRATION,
+  IS_TEST_ENV
 }

@@ -25,6 +25,11 @@ const app = express()
   .use('/api/users', controllers.users)
   .use('/api/login', controllers.login)
 
+if (config.IS_TEST_ENV) {
+  app.use('/api/testing', controllers.testing)
+}
+
+app
   .use(middleware.unknownEndpoint)
   .use(middleware.errorHandler)
 
